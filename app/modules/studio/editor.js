@@ -1,10 +1,10 @@
 (function () {
   var util = require('./helpers/util');
 
-
-
   var defaultConfig = {
     theme: 'monokai',
+    //输入带闪瞎眼特技
+    blastCode: { effect: 1},
     tabSize: 2,
     //关闭自带的拖动显示
     dragDrop: false,
@@ -66,7 +66,7 @@
     editor.setOption("extraKeys", {
       "'.'": function (cm) {
         setTimeout(function () { server.complete(cm); }, 100);
-        throw CodeMirror.Pass; // tell CodeMirror we didn't handle the key 
+        throw CodeMirror.Pass; // tell CodeMirror we didn't handle the key
       },
       "Ctrl-.": function (cm) { server.complete(cm); },
       "Ctrl-I": function (cm) { server.showType(cm); },
@@ -74,9 +74,9 @@
       //"Alt-,": function (cm) { server.jumpBack(cm); },
       //"Ctrl-Q": function (cm) { server.rename(cm); },
       "Ctrl-R": function (cm) { server.selectName(cm); },
-      "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); }, 
+      "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); },
       "Ctrl-J": "toMatchingTag"
-    })
+    });
     editor.on("cursorActivity", function (cm) { server.updateArgHints(cm); });
   };
 
@@ -86,7 +86,7 @@
       shtml: htmlmixed,
       php: 'application/x-httpd-php',
       aspx: htmlmixed,
-      js: 'javascript',
+      js: 'jsx',
       bb: 'javascript',
       coffee: 'coffeescript',
       md: 'markdown',
@@ -96,7 +96,8 @@
       json: 'json',
       'null': 'null',
       ts:'text/typescript',
-      adv: 'javascript'
+      adv: 'javascript',
+      jsx:'jsx'
     },
     editors: {
 
@@ -131,7 +132,7 @@
       var tab = $('.editor-tab-btn[data-index="' + index + '"]');
       var filepath = tab.data('filepath');
       delete this.editors[filepath];
-      tab.remove()
+      tab.remove();
       //删除语法提示弹出框
       $('.CodeMirror-Tern-tooltip').remove();
 
@@ -170,12 +171,14 @@
         var tab = $('.editor-tab-btn[data-filepath="' + filepath.replace(/\\/ig, '\\\\') + '"]');
         this.toggleToTab(tab.data('index'));
         return;
-      };
+      }
       var index = util.generalId();
-      var me = this, txt = '', wrap = $('<div class="logContentWrap" data-index="' + index + '" data-filepath="' + filepath + '">'), el;
+      var me = this, txt = '', wrap = $('<div class="logContentWrap" data-index="' + index + '" data-filepath="' + filepath + '">'),
+          el,cmbg = $('<div class="CodeMirrorBg"></div>');
       //生成编辑器
       el = $('<textarea name="" class="logContent"></textarea>');
       wrap.append(el);
+      wrap.append(cmbg);
       wrap.show();
       $('#editorRightContent').append(wrap);
       //生成tab按钮
@@ -189,7 +192,7 @@
         //如果没指定编辑器模式,则根据文件扩展名判断
         var fileSuff = filepath.match(/\.([^\.]+$)/);
         var mode = fileSuff ? fileSuff[1] : 'null';
-        
+
         if (!options.mode) options.mode = this.MODES[mode] || 'null';
         if (mode == 'js' || mode == 'bb') {
           options.lint = true;
